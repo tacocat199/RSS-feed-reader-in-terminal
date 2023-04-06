@@ -2,6 +2,7 @@
 import requests
 import webbrowser
 import pandas as pd
+import re
 from requests_html import HTMLSession
 from requests_html import HTML
 
@@ -63,26 +64,24 @@ def parse_feed(url):
     return entries
 
 # Define a function to get the RSS feed URL from the user
-def get_feed_url():
-    """Get the RSS feed URL from the user.
+def get_feed_urls():
+    """Get the RSS feed URLs from the user.
 
     Returns:
-        url (string): The RSS feed URL entered by the user.
+        urls (string): The RSS feed URLs entered by the user.
     """
-    url = input("Enter the RSS feed URL: ")
-    return url
+    urls_str = input("Enter the RSS feed URLs seperated by a comma or space: ")
+    urls = [url.strip() for url in re.split(',|\s', urls_str) if url.strip()]
+    return urls
 
 # Get the RSS feed URL from the user
-url = get_feed_url()
+urls = get_feed_urls()
 
-# Parse the RSS feed from Epic Games Store
-entries = parse_feed(url)
-
-# Convert the entries list to a pandas dataframe
+# Parse the RSS feed from each URL and combine the results into a single dataframe
+entries = []
+for url in urls:
+    entries += parse_feed(url)
 df = pd.DataFrame(entries)
-
-# Display the first 5 rows of the dataframe
-print(df.head())
 
 # Filter the dataframe by title containing 'free'
 free_games = df[df['title'].str.contains('free', case=False)]
